@@ -1,4 +1,4 @@
-import * as at from './actionTypes';
+import * as at from "./actionTypes";
 
 // ACTION CREATORS;
 /** needs to be an action creator
@@ -13,7 +13,31 @@ export const fetchAllInstructors = (instructors) => {
   };
 };
 
-//Single instructor
+// Add Instructor
+export const addInstructor = (instructor) => {
+  return {
+    type: at.ADD_INSTRUCTOR,
+    payload: instructor,
+  };
+};
+
+// Edit Instructor
+export const editInstructor = (instructor) => {
+  return {
+    type: at.EDIT_INSTRUCTOR,
+    payload: instructor,
+  };
+};
+
+// Delete Instructor
+export const deleteInstructor = (instructorId) => {
+  return {
+    type: at.DELETE_INSTRUCTOR,
+    payload: instructorId,
+  };
+};
+
+// Single instructor
 export const fetchInstructor = (instructor) => {
   return {
     type: at.FETCH_INSTRUCTOR,
@@ -21,7 +45,7 @@ export const fetchInstructor = (instructor) => {
   };
 };
 
-//All courses
+// All courses
 export const fetchAllCourses = (courses) => {
   return {
     type: at.FETCH_ALL_COURSES,
@@ -42,7 +66,6 @@ export const deleteCourse = (courseId) => {
     payload: courseId,
   };
 };
-
 
 export const editCourse = (course) => {
   return {

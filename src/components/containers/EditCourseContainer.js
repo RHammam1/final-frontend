@@ -1,9 +1,8 @@
-import { Component } from 'react';
-import { connect } from 'react-redux';
-import { Redirect, Link } from 'react-router-dom';
+import { Component } from "react";
+import { connect } from "react-redux";
+import { Redirect, Link } from "react-router-dom";
 
-import { fetchCourseThunk, editCourseThunk, fetchAllInstructorsThunk  } from '../../store/thunks';
-
+import { fetchCourseThunk, editCourseThunk, fetchAllInstructorsThunk } from "../../store/thunks";
 
 /*
 IMPORTANT: comments regarding implementation details!!
@@ -39,160 +38,173 @@ functionality of the buttons controlling that portion of the UI.
 */
 
 class EditCourseContainer extends Component {
-    constructor(props){
-        super(props);
-        this.state = {
-          title: "", 
-          timeslot: "",
-          instructorId: null, 
-          redirect: false, 
-          redirectId: null,
-          error: ""
-        };
+  constructor(props) {
+    super(props);
+    this.state = {
+      title: "",
+      timeslot: "",
+      instructorId: null,
+      redirect: false,
+      redirectId: null,
+      error: "",
+    };
+  }
+
+  componentDidMount() {
+    //getting course ID from url
+    this.props.fetchCourse(this.props.match.params.id);
+    this.props.fetchInstructors();
+    this.setState({
+      title: this.props.course.title,
+      timeslot: this.props.course.timeslot,
+      instructorId: this.props.course.instructorId,
+    });
+  }
+
+  handleChange = (event) => {
+    this.setState({
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  handleSelectChange = (event) => {
+    //handle change for the dropdown menu
+    //want to set the instructorId based on the selected choice
+    //when the form gets submitted, this is how we can change
+    //assigned instructor without having to manually enter in the
+    //instructorId like before
+    if (event.target.value === "staff") {
+      this.setState({ instructorId: null });
+    } else {
+      this.setState({ instructorId: event.target.value });
+    }
+  };
+
+  handleSubmit = async (event) => {
+    event.preventDefault();
+    //implementing form validation
+    if (this.state.title === "") {
+      this.setState({ error: "Error: title cannot be empty" });
+      return;
     }
 
-    componentDidMount() {
-        //getting course ID from url
-        this.props.fetchCourse(this.props.match.params.id);
-        this.props.fetchInstructors();
-        this.setState({
-            title: this.props.course.title, 
-            timeslot: this.props.course.timeslot,
-            instructorId: this.props.course.instructorId, 
-        });
-      }
+    // get new info for course from form input
+    let course = {
+      id: this.props.course.id,
+      title: this.state.title,
+      timeslot: this.state.timeslot,
+      instructorId: this.state.instructorId,
+    };
 
-    handleChange = event => {
-      this.setState({
-        [event.target.name]: event.target.value
-      });
+    // dispatch edit instructor thunk
+    await this.props.editCourse(course);
+
+    this.setState({
+      redirect: true,
+      redirectId: this.props.course.id,
+    });
+  };
+
+  componentWillUnmount() {
+    this.setState({ redirect: false, redirectId: null });
+  }
+
+  render() {
+    let { course, allInstructors, editCourse, fetchCourse } = this.props;
+    let assignedInstructor = course.instructorId;
+
+    let otherInstructors = allInstructors.filter((instructor) => instructor.id !== assignedInstructor);
+
+    //go to single course view of the edited course
+    if (this.state.redirect) {
+      return <Redirect to={`/course/${this.state.redirectId}`} />;
     }
 
-    handleSelectChange = event => {
-      //handle change for the dropdown menu
-      //want to set the instructorId based on the selected choice
-      //when the form gets submitted, this is how we can change
-      //assigned instructor without having to manually enter in the 
-      //instructorId like before
-      if (event.target.value === "staff") {
-        this.setState({instructorId:null});
-      } else {
-        this.setState({instructorId: event.target.value})
-      }
-    }
+    return (
+      <div>
+        <form style={{ textAlign: "center" }} onSubmit={(e) => this.handleSubmit(e)}>
+          <label style={{ color: "#11153e", fontWeight: "bold" }}>Title: </label>
+          <input type="text" name="title" value={this.state.title || ""} placeholder={course.title} onChange={(e) => this.handleChange(e)} />
+          <br />
 
-    handleSubmit = event => {
-        event.preventDefault();
-        //implementing form validation
-        if (this.state.title === "") {
-          this.setState({error: "Error: title cannot be empty"});
-          return;
-        }
+          <label style={{ color: "#11153e", fontWeight: "bold" }}>Timeslot: </label>
+          <input type="text" name="timeslot" value={this.state.timeslot || ""} placeholder={course.timeslot} onChange={(e) => this.handleChange(e)} />
+          <br />
 
-        //get new info for course from form input
-        let course = {
-            id: this.props.course.id,
-            title: this.state.title,
-            timeslot: this.state.timeslot,
-            instructorId: this.state.instructorId
-        };
-        
-        this.props.editCourse(course);
+          <select onChange={(e) => this.handleSelectChange(e)}>
+            {course.instructor !== null ? <option value={course.instructorId}>{course.instructor.firstname + " (current)"}</option> : <option value="staff">Staff</option>}
+            {otherInstructors.map((instructor) => {
+              return (
+                <option value={instructor.id} key={instructor.id}>
+                  {instructor.firstname}
+                </option>
+              );
+            })}
+            {course.instructor !== null && <option value="staff">Staff</option>}
+          </select>
 
-        this.setState({
-          redirect: true, 
-          redirectId: this.props.course.id
-        });
+          <button type="submit">Submit</button>
+        </form>
+        {this.state.error !== "" && <p>{this.state.error}</p>}
 
-    }
-
-    componentWillUnmount() {
-        this.setState({redirect: false, redirectId: null});
-
-    }
-
-    render() {
-        let { course, allInstructors, editCourse, fetchCourse} = this.props;
-        let assignedInstructor = course.instructorId;
-
-        let otherInstructors = allInstructors.filter(instructor => instructor.id!==assignedInstructor);
-      
-        //go to single course view of the edited course
-        if(this.state.redirect) {
-          return (<Redirect to={`/course/${this.state.redirectId}`}/>)
-        }
-
-        return (
-        <div>
-        <form style={{textAlign: 'center'}} onSubmit={(e) => this.handleSubmit(e)}>
-            <label style= {{color:'#11153e', fontWeight: 'bold'}}>Title: </label>
-            <input type="text" name="title" value={this.state.title || ''} placeholder={course.title} onChange ={(e) => this.handleChange(e)}/>
-            <br/>
-
-            <label style={{color:'#11153e', fontWeight: 'bold'}}>Timeslot: </label>
-            <input type="text" name="timeslot" value={this.state.timeslot || ''} placeholder={course.timeslot} onChange={(e) => this.handleChange(e)}/>
-            <br/>
-
-            <select onChange={(e) => this.handleSelectChange(e)}>
-              {course.instructor!==null ?
-                <option value={course.instructorId}>{course.instructor.firstname+" (current)"}</option>
-              : <option value="staff">Staff</option>
-              }
-              {otherInstructors.map(instructor => {
-                return (
-                  <option value={instructor.id} key={instructor.id}>{instructor.firstname}</option>
-                )
-              })}
-              {course.instructor!==null && <option value="staff">Staff</option>}
-            </select>
-  
-            <button type="submit">
-              Submit
-            </button>
-
-          </form>
-          { this.state.error !=="" && <p>{this.state.error}</p> }
-
-          {course.instructorId !== null ?
-            <div> Current instructor:  
+        {course.instructorId !== null ? (
+          <div>
+            {" "}
+            Current instructor:
             <Link to={`/instructor/${course.instructorId}`}>{course.instructor.firstname}</Link>
-            <button onClick={async () => {await editCourse({id:course.id, instructorId: null});  fetchCourse(course.id)}}>Unassign</button>
-            </div>
-            : <div> No instructor currently assigned </div>
-          }
+            <button
+              onClick={async () => {
+                await editCourse({ id: course.id, instructorId: null });
+                fetchCourse(course.id);
+              }}
+            >
+              Unassign
+            </button>
+          </div>
+        ) : (
+          <div> No instructor currently assigned </div>
+        )}
 
-          <div> Other instructors
-          {otherInstructors.map(instructor => {
+        <div>
+          {" "}
+          Other instructors
+          {otherInstructors.map((instructor) => {
             return (
-            <div key={instructor.id}>
+              <div key={instructor.id}>
                 <Link to={`/instructor/${instructor.id}`}>
                   <h4>{instructor.firstname}</h4>
                 </Link>
-                <button onClick={async() => {await editCourse({id:course.id, instructorId: instructor.id}); fetchCourse(course.id)}}>Assign this instructor</button>
-            </div>
-            )})
-          }
-          </div>
+                <button
+                  onClick={async () => {
+                    await editCourse({ id: course.id, instructorId: instructor.id });
+                    fetchCourse(course.id);
+                  }}
+                >
+                  Assign this instructor
+                </button>
+              </div>
+            );
+          })}
         </div>
-        )
-    }
+      </div>
+    );
+  }
 }
 
 // map state to props
 const mapState = (state) => {
-    return {
-      course: state.course,
-      allInstructors: state.allInstructors
-    };
+  return {
+    course: state.course,
+    allInstructors: state.allInstructors,
   };
+};
 
 const mapDispatch = (dispatch) => {
-    return({
-        editCourse: (course) => dispatch(editCourseThunk(course)),
-        fetchCourse: (id) => dispatch(fetchCourseThunk(id)),
-        fetchInstructors: () => dispatch(fetchAllInstructorsThunk()),
-
-    })
-}
+  return {
+    editCourse: (course) => dispatch(editCourseThunk(course)),
+    fetchCourse: (id) => dispatch(fetchCourseThunk(id)),
+    fetchInstructors: () => dispatch(fetchAllInstructorsThunk()),
+  };
+};
 
 export default connect(mapState, mapDispatch)(EditCourseContainer);

@@ -1,10 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { 
-  fetchInstructorThunk,
-  fetchAllCoursesThunk,
-  editCourseThunk 
-} from "../../store/thunks";
+import { fetchInstructorThunk, fetchAllCoursesThunk, editCourseThunk } from "../../store/thunks";
 
 import { InstructorView } from "../views";
 
@@ -16,13 +12,7 @@ class InstructorContainer extends Component {
   }
 
   render() {
-    return (
-      <InstructorView 
-        instructor={this.props.instructor}
-        editCourse={this.props.editCourse}
-        allCourses={this.props.allCourses}
-      />
-    );
+    return <InstructorView instructor={this.props.instructor} editCourse={this.props.editCourse} allCourses={this.props.allCourses} />;
   }
 }
 
@@ -31,7 +21,6 @@ const mapState = (state) => {
   return {
     instructor: state.instructor,
     allCourses: state.allCourses,
-
   };
 };
 
@@ -41,7 +30,6 @@ const mapDispatch = (dispatch) => {
     fetchInstructor: (id) => dispatch(fetchInstructorThunk(id)),
     editCourse: (course) => dispatch(editCourseThunk(course)),
     fetchCourses: () => dispatch(fetchAllCoursesThunk()),
-
   };
 };
 

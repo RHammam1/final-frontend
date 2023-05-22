@@ -1,16 +1,21 @@
 // ACTION TYPES;
 
-//All campuses
+// All campuses
 export const FETCH_ALL_INSTRUCTORS = "FETCH_ALL_INSTRUCTORS";
-
-//Single campus
+// Add campus
+export const ADD_INSTRUCTOR = "ADD_INSTRUCTOR";
+// Edit campus
+export const EDIT_INSTRUCTOR = "EDIT_INSTRUCTOR";
+// Delete campus
+export const DELETE_INSTRUCTOR = "DELETE_INSTRUCTOR";
+// Single campus
 export const FETCH_INSTRUCTOR = "FETCH_INSTRUCTOR";
 
-//All students
+// All students
 export const FETCH_ALL_COURSES = "FETCH_ALL_COURSES";
 export const ADD_COURSE = "ADD_COURSE";
 export const DELETE_COURSE = "DELETE_COURSE";
 export const EDIT_COURSE = "EDIT_COURSE";
 
-//Single student
+// Single student
 export const FETCH_COURSE = "FETCH_COURSE";

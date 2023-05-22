@@ -10,11 +10,7 @@ class CourseContainer extends Component {
   }
 
   render() {
-    return (
-      <CourseView 
-        course={this.props.course}
-      />
-    );
+    return <CourseView course={this.props.course} />;
   }
 }
 
